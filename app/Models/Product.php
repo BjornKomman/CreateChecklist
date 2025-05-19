@@ -3,22 +3,33 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
 {
-    protected $casts = [
-        'started_at' => 'datetime',
-        'finished_at'=> 'datetime',
-        'active'     => 'boolean',
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'name',
+        'description',
+        'amount_per_minute',
+        'started_at',
+        'finished_at',
+        'active',
     ];
 
-    // Een product “maakt” (eigenaar)
+    protected $casts = [
+        'active' => 'boolean',
+        'started_at' => 'datetime',
+        'finished_at' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Zelf‑relatie: van en naar dependencies
     public function dependencies()
     {
         return $this->belongsToMany(
@@ -39,10 +50,8 @@ class Product extends Model
         )->withTimestamps();
     }
 
-    // Inactive relations
     public function inactiveRelations()
     {
         return $this->hasMany(InactiveRelation::class);
     }
 }
-

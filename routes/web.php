@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductDependencyController;
+use App\Http\Controllers\InactiveRelationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -16,5 +19,22 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+});
+
+Route::resource('products', ProductController::class);
+Route::resource('dependencies', ProductDependencyController::class)->only(['index', 'create', 'store']);
+Route::resource('inactive-relations', InactiveRelationController::class)->only(['index']);
+Route::resource('products', ProductController::class)->middleware('auth');
+
+Route::get('products/inactive', [ProductController::class, 'inactive'])->name('products.inactive')->middleware('auth');
 
 require __DIR__.'/auth.php';
