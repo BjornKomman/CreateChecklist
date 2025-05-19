@@ -4,24 +4,27 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateProductDependenciesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('product_dependencies', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('product_id')
+                  ->constrained('products')
+                  ->onDelete('cascade');
+            $table->foreignId('depends_on_id')
+                  ->constrained('products')
+                  ->onDelete('cascade');
             $table->timestamps();
+
+            $table->unique(['product_id', 'depends_on_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('product_dependencies');
     }
-};
+}
+
