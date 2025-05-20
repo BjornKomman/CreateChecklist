@@ -38,8 +38,6 @@ class ProductDependencyController extends Controller
             'depends_on_id' => 'required|exists:products,id|different:product_id',
         ]);
 
-        ProductDependency::create($validated);
-
         $exists = ProductDependency::where('product_id', $request->product_id)
             ->where('depends_on_id', $request->depends_on_id)
             ->exists();
@@ -48,8 +46,11 @@ class ProductDependencyController extends Controller
             return back()->withErrors(['This dependency already exists.']);
         }
 
+        ProductDependency::create($validated);
+
         return redirect()->route('dependencies.index')->with('success', 'Dependency created.');
     }
+
 
     /**
      * Display the specified resource.
@@ -62,24 +63,34 @@ class ProductDependencyController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ProductDependency $productDependency)
+    public function edit(ProductDependency $dependency)
     {
-        //
+        $products = Product::all();
+        return view('dependencies.edit', compact('dependency', 'products'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ProductDependency $productDependency)
+    public function update(Request $request, ProductDependency $dependency)
     {
-        //
+        $validated = $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'depends_on_id' => 'required|exists:products,id|different:product_id',
+        ]);
+
+        $dependency->update($validated);
+
+        return redirect()->route('dependencies.index')->with('success', 'Dependency updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ProductDependency $productDependency)
+    public function destroy(ProductDependency $dependency)
     {
-        //
+        $dependency->delete();
+
+        return redirect()->route('dependencies.index')->with('success', 'Dependency deleted.');
     }
 }

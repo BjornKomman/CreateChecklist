@@ -92,18 +92,23 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        $product->update(['active' => false]);
+        if ($product->dependents()->exists()) {
+            $product->update(['active' => false]);
 
-        // Make dependent products inactive
-        foreach ($product->dependents as $dependent) {
-            $dependent->update(['active' => false]);
-            $dependent->inactiveRelations()->create([
-                'missing_dependency_id' => $product->id,
-            ]);
+            foreach ($product->dependents as $dependent) {
+                $dependent->update(['active' => false]);
+                $dependent->inactiveRelations()->create([
+                    'missing_dependency_id' => $product->id,
+                ]);
+            }
+
+            return redirect()->route('products.index')->with('success', 'Product and dependents marked inactive.');
         }
 
-        return response()->json(['message' => 'Product and dependencies marked inactive.']);
+        $product->delete();
+        return redirect()->route('products.index')->with('success', 'Product deleted.');
     }
+
 
     public function inactive()
     {

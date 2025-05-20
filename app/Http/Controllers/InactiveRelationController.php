@@ -12,7 +12,10 @@ class InactiveRelationController extends Controller
      */
     public function index()
     {
-        //
+        // Load inactive relations with related products and missing dependencies
+        $relations = InactiveRelation::with(['product', 'missingDependency'])->get();
+
+        return view('inactive_relations.index', compact('relations'));
     }
 
     /**
@@ -61,5 +64,40 @@ class InactiveRelationController extends Controller
     public function destroy(InactiveRelation $inactiveRelation)
     {
         //
+    }
+
+    public function reactivate(InactiveRelation $inactiveRelation)
+    {
+        $product = $inactiveRelation->product;
+        if ($product) {
+            $product->update(['active' => true]);
+        }
+
+        $inactiveRelation->delete();
+
+        return redirect()->route('inactive-relations.index')->with('success', 'Product reactivated successfully.');
+    }
+
+    public function forceDelete(InactiveRelation $inactiveRelation)
+    {
+        $product = $inactiveRelation->product;
+        if ($product) {
+            $product->delete(); // Add this
+        }
+
+        $inactiveRelation->delete();
+
+        return redirect()->route('inactive-relations.index')->with('success', 'Inactive relation and product deleted.');
+    }
+
+
+    public function setInactive(InactiveRelation $inactiveRelation)
+    {
+        $product = $inactiveRelation->product;
+        if ($product) {
+            $product->update(['active' => false]);
+        }
+
+        return redirect()->route('inactive-relations.index')->with('success', 'Product set inactive.');
     }
 }

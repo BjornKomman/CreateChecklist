@@ -31,9 +31,17 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::resource('products', ProductController::class);
-Route::resource('dependencies', ProductDependencyController::class)->only(['index', 'create', 'store']);
+Route::resource('dependencies', ProductDependencyController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 Route::resource('inactive-relations', InactiveRelationController::class)->only(['index']);
 Route::resource('products', ProductController::class)->middleware('auth');
+
+Route::prefix('inactive-relations')->name('inactive-relations.')->group(function () {
+    Route::get('/', [InactiveRelationController::class, 'index'])->name('index');
+    Route::post('{inactiveRelation}/reactivate', [InactiveRelationController::class, 'reactivate'])->name('reactivate');
+    Route::delete('{inactiveRelation}/force-delete', [InactiveRelationController::class, 'forceDelete'])->name('force-delete');
+    Route::post('{inactiveRelation}/set-inactive', [InactiveRelationController::class, 'setInactive'])->name('set-inactive');
+});
+
 
 Route::get('products/inactive', [ProductController::class, 'inactive'])->name('products.inactive')->middleware('auth');
 
